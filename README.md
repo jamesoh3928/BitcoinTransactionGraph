@@ -17,3 +17,18 @@ You would have to set `RPC_USER` and `RPC_PASSWORD` as environment variables, si
 
 
 ## How to use it
+
+
+### TODO List
+1. Modularize the rpc requests (for now, only implement the ones we need)
+- getblockchaininfo
+- getblock
+- get
+- getrawtransaction
+- decoderawtransaction
+- getrawmempool
+2. Use it to construct the graph
+- calculate the data based on the input
+- get all hashes of the blocks
+- get all transactions
+- construct a graph object
