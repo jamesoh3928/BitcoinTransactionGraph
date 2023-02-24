@@ -30,6 +30,30 @@ class BitcoinRpc():
             print("Error during get_block_count:", response.status_code, response.reason)
             return -1
         
+    def get_block_hash(self, height):
+        """Returns hash of block in best-block-chain at height provided.
+
+        Args:
+            height (int): The height index
+
+        Returns:
+            string: The block hash
+
+        """
+        payload = json.dumps({
+            "method": "getblockhash",
+            "params": [height],
+            "jsonrpc": "2.0",
+            "id": "0"
+        })
+        response = requests.post(self.url, headers=self.headers, data=payload)
+        if response.status_code == 200:
+            result = json.loads(response.text)['result']
+            return result
+        else:
+            print("Error during get_block_hash:", response.status_code, response.reason)
+            return -1
+        
     def get_blockchain_info(self):
         """Returns the blockchain info. Include information of chain, blocks, headers, bestblockhash, difficulty, time, mediantime, verificationprogress, initialblockdownload, chainwork, size_on_disk, pruned, warnings.
 
@@ -161,5 +185,6 @@ class BitcoinRpc():
             return -1
         
     # TODO: 
+    # savemempool
     # listunspent
     # gettxout
