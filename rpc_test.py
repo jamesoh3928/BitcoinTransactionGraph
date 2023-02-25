@@ -24,12 +24,12 @@ bitcp = BitcoinRpc(rpc_user, rpc_password, rpc_host, rpc_port)
 
 # Block
 block_hash = "0000000000000000000576954cbe6d679b00dac060459b6b2c31155a869839ad"
-block = bitcp.get_block(block_hash, 2)
-print(block['tx'][1])
-print(len(block['tx']))
+# block = bitcp.get_block(block_hash, 2)
+# print(block['tx'][1])
+# print(len(block['tx']))
 # print(block)
 # print(type(block))
-# print(bitcp.get_block(block_hash, 1))
+print(bitcp.get_block(block_hash, 1))
 # Note: the hexadecimal represnetation is very long
 # print(bitcp.get_block(block_hash, 0))
 
