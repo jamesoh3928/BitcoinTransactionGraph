@@ -100,7 +100,7 @@ class BitcoinRpc():
             print("Error during get_block:", response.status_code, response.reason)
             return -1
         
-    def get_raw_transaction(self, txid, verbose, blockhash):
+    def get_raw_transaction(self, txid, verbose, blockhash=None):
         """Returns raw transaction representation for given transaction id. 
 
         By default this function only works for mempool transactions. 
@@ -117,12 +117,20 @@ class BitcoinRpc():
 
         """
 
-        payload = json.dumps({
-            "method": "getrawtransaction",
-            "params": [txid, verbose, blockhash],
-            "jsonrpc": "2.0",
-            "id": "0"
-        })
+        if blockhash is None:
+            payload = json.dumps({
+                "method": "getrawtransaction",
+                "params": [txid, verbose],
+                "jsonrpc": "2.0",
+                "id": "0"
+            })
+        else:
+            payload = json.dumps({
+                "method": "getrawtransaction",
+                "params": [txid, verbose, blockhash],
+                "jsonrpc": "2.0",
+                "id": "0"
+            })
         response = requests.post(self.url, headers=self.headers, data=payload)
         if response.status_code == 200:
             result = json.loads(response.text)['result']
