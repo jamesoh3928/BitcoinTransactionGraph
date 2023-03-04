@@ -1,3 +1,8 @@
+TODO
+1. Update getrawtransaction to take optional argument
+2. Test getrawtransaction
+3. Try to construct the graph with data that exclusively has addresses
+
 # Bitcoin Transaction Graph
 
 ## Setup
@@ -16,8 +21,11 @@ You would have to set `BITCOIN_RPC_USER` and `BITCOIN_RPC_PASSWORD` as environme
 4. Set `BITCOIN_RPC_USER` and `BITCOIN_RPC_PASSWORD` based on your authentication. 
 
 
-## How to use it
+## How to Interpret Graph
 
+### Types of Transactions
+
+## How to use it
 
 ### TODO List
 1. Modularize the rpc requests (for now, only implement the ones we need)
