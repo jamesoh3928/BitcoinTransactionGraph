@@ -67,7 +67,6 @@ def parse_tx(tx):
     # Calculate the total amount of inputs and outputs
     # TODO: for now assume that transaction data contains address information
     # TEST with: 4ef6d37bc1110e1a49ab2f1724c82a5a3bd38bc25777284d8b13894059e77eae
-    
     # [{'txid': 'd3df0446522e514be223fe5affdce073222c113be2be8101e531d425e2598585', 'vout': 1, 'scriptSig': {'asm': '30440220509f2115e5f611bf0de6c5c2b8427f201586f4ce2ecb238b157098ac7a9bfdb202201de2ee97e3b2175ab037f4f43c54d6ba6601645ef8387bb3dedbbea6dd262017[ALL] 03548d2343a187741496b4e7983f962ec26c70d69d1b047877646453b8986f5c85', 'hex': '4730440220509f2115e5f611bf0de6c5c2b8427f201586f4ce2ecb238b157098ac7a9bfdb202201de2ee97e3b2175ab037f4f43c54d6ba6601645ef8387bb3dedbbea6dd262017012103548d2343a187741496b4e7983f962ec26c70d69d1b047877646453b8986f5c85'}, 'sequence': 4294967293}]
     input_addr_amount = []
     inputs = tx["vin"]
@@ -89,14 +88,30 @@ def parse_tx(tx):
             # TODO maybe come up with better representation
             input_addr_amount.append((-1, output['value']))
         output_addr_amount.append((output['scriptPubKey']['address'], output['value']))
-        # If coinbase, update input value same as output
+
+    # TODO: check if input and output values are equal (including transaction fee)
+    sum_input = sum([input_amount for _, input_amount in input_addr_amount])
+    sum_output = sum([output_amount for _, output_amount in output_addr_amount])
+    tx_fee = sum_input - sum_output
+    # if 'coinbase' not in input:
+    #     sum_output += tx['fee']
+    # if sum_input != sum_output:
+    #     print("ERROR: input and output values are not equal")
+    #     print("sum_input", sum_input)
+    #     print("sum_output (including transaction fee)", sum_output)
+    #     print("input_addr_amount", input_addr_amount)
+    #     print("output_addr_amount", output_addr_amount)
+    #     print("tx fee", tx['fee'])
+    #     # print("tx", tx)
+    #     return []
 
     edges = []
     # For each input, create an edge to output address until all values are used
     # if all values are used, then create an edge to the next input address
     output_ind = 0
-    # print("input_addr_amount", input_addr_amount)
-    # print("output_addr_amount", output_addr_amount)
+    # TODO: transaction fee (for now, just add to first input address)
+    if tx_fee > 0:
+        edges.append((input_addr_amount[0][0], -1, tx_fee))
     for input_addr, input_amount in input_addr_amount:
         while output_ind < len(output_addr_amount):
             output_addr, output_amount = output_addr_amount[output_ind]
@@ -112,10 +127,20 @@ def parse_tx(tx):
                 # Update output amount in place 
                 output_addr_amount[output_ind] = (output_addr, output_amount)
                 input_amount = 0
-                
-    # TODO double check this
-    if output_ind < len(output_addr_amount):
-        print("ERROR: not all output values are used")
+    
+    # TODO: change this to check if all input values are used (sum values in edges)
+    sum_edges = round(sum([edge_amount for _, _, edge_amount in edges]), 8)
+    if sum_edges != round(sum_input, 8):
+        print("ERROR: sum of edges is not equal to sum of input values")
+        print("sum_edges", sum_edges)
+        print("sum_input", sum_input)
+        print("edges", edges)
+        print("input_addr_amount", input_addr_amount)
+        print("output_addr_amount", output_addr_amount)
+        # print("tx", tx)
+        return []
+    # if output_ind < len(output_addr_amount):
+    #     print("ERROR: not all output values are used")
     # print("edges", edges)
     return edges
 
@@ -175,17 +200,4 @@ def block_hashes_by_stamps(start_timestamp, end_timestamp):
 # main function
 if __name__ == "__main__":
     # Get transaction of given time range
-    # tx_graph_timestamp("2009/05/05 09:00:00", "2009/05/05 10:00:00")
     tx_graph_datetime("2023/01/01 09:00:00", "2023/01/01 09:15:00")
-
-    # temp = bitrpc.get_block("00000000000000000001cdebb827bb4580a1cf0dd93172e2d00dd25dba341809", 2)
-    # for tx in temp['tx']:
-    #     print(tx)
-
-    # print("\n\n")
-    # print(len(temp['tx']))
-
-    # print(bitrpc.get_block("000000008be5151fa84c4eeec998e61cbcfdaf8123d610381d7e3c8c25af57d2", 2))
-    # print(bitrpc.get_raw_transaction("d3df0446522e514be223fe5affdce073222c113be2be8101e531d425e2598585", 0))
-    # print(bitrpc.get_raw_transaction("d3df0446522e514be223fe5affdce073222c113be2be8101e531d425e2598585", 1))
-    # print(bitrpc.get_raw_transaction("d3df0446522e514be223fe5affdce073222c113be2be8101e531d425e2598585", 2))
