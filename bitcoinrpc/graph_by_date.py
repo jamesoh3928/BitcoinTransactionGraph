@@ -24,9 +24,9 @@ def tx_graph_date(start_date, end_date):
     start_timestamp = datetime.strptime(start_date, "%Y/%m/%d").timestamp()
     end_timestamp = datetime.strptime(end_date, "%Y/%m/%d").timestamp()
     graph = tx_graph_timestamp(start_timestamp, end_timestamp)
-    nx.write_weighted_edgelist(graph, "./txs_graph/date/txs_{start_date}_{end_date}.edgelist")
-    print("Graph saved to ./txs_graph/date/txs_{start_date}_{end_date}.edgelist")
-    return "./txs_graph/date/txs_{start_timestamp}_{end_timestamp}.edgelist"
+    nx.write_weighted_edgelist(graph, f"./txs_graph/date/txs_{start_date}_{end_date}.edgelist")
+    print(f"Graph saved to ./txs_graph/date/txs_{start_date}_{end_date}.edgelist")
+    return f"./txs_graph/date/txs_{start_timestamp}_{end_timestamp}.edgelist"
 
 # Get transaction data of given datetime (start_datetime is included, end_datetime is excluded)
 # Format of datetime: %Y/%m/%d %H:%M:%S (always UTC)
@@ -35,9 +35,11 @@ def tx_graph_datetime(start_datetime, end_datetime):
     start_timestamp = datetime.strptime(start_datetime, "%Y/%m/%d %H:%M:%S").timestamp()
     end_timestamp = datetime.strptime(end_datetime, "%Y/%m/%d %H:%M:%S").timestamp()
     graph = tx_graph_timestamp(start_timestamp, end_timestamp)
-    nx.write_weighted_edgelist(graph, "./txs_graph/datetime/txs_{start_datetime}_{end_datetime}.edgelist")
-    print("Graph saved to ./txs_graph/datetime/txs_{start_datetime}_{end_datetime}.edgelist")
-    return "./txs_graph/datetime/txs_{start_datetime}_{end_datetime}.edgelist"
+    start_in_filename = start_timestamp.strftime("%Y.%m.%d.%H.%M.%S")
+    end_in_filename = end_timestamp.strftime("%Y.%m.%d.%H.%M.%S")
+    nx.write_weighted_edgelist(graph, "./txs_graph/datetime/txs_{start_in_filename}_{end_in_filename}.edgelist")
+    print("Graph saved to ./txs_graph/datetime/txs_{start_in_filename}_{end_in_filename}.edgelist")
+    return "./txs_graph/datetime/txs_{start_in_filename}_{end_in_filename}.edgelist"
 
 # Block data format
 # Verbosity 2
@@ -207,9 +209,9 @@ def draw_graph(MG):
 # main function
 if __name__ == "__main__":
     # Get transaction of given time range
-    filename = tx_graph_datetime("2023/01/01 09:00:00", "2023/01/01 09:15:00")
-    print("Reading {filename}")
-    MG = nx.read_weighted_edgelist("filename")
+    filename = tx_graph_datetime("2023/01/01 00:00:00", "2023/01/01 11:59:59")
+    print(f"Reading {filename}")
+    MG = nx.read_weighted_edgelist(f"{filename}")
     print(dict(MG.degree(weight='weight')))
     # G = nx.Graph()
     # G.add_edge('A', 'B', weight=2.0)
