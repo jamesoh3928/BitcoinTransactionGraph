@@ -1,7 +1,12 @@
 TODO
-1. Update getrawtransaction to take optional argument
-2. Test getrawtransaction
-3. Try to construct the graph with data that exclusively has addresses
+- Re-read the transaction types in Mastering Bitcoin: https://github.com/bitcoinbook/bitcoinbook/blob/develop/ch06.asciidoc
+1. Use pickle to serialize the object (maybe later)
+2. Write code for reading and saving object (for reading create different file): for writing, write graph object to the file of name "tx_start_end"
+3. pip freeze > requirements. txt
+4. Push code and test it on better machine
+Future:
+1. Try to construct the graph with data that do not have address fields
+Keegan's code: https://github.com/kjk6690/Cryptocurrency-Research/blob/main/old_data/block_724784.adjlist
 
 # Bitcoin Transaction Graph
 
