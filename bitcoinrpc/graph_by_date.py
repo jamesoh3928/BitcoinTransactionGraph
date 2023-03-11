@@ -37,17 +37,12 @@ def tx_graph_datetime(start_datetime, end_datetime):
     graph = tx_graph_timestamp(start_timestamp, end_timestamp)
     start_in_filename = start_timestamp.strftime("%Y.%m.%d.%H.%M.%S")
     end_in_filename = end_timestamp.strftime("%Y.%m.%d.%H.%M.%S")
-    nx.write_weighted_edgelist(graph, "./txs_graph/datetime/txs_{start_in_filename}_{end_in_filename}.edgelist")
-    print("Graph saved to ./txs_graph/datetime/txs_{start_in_filename}_{end_in_filename}.edgelist")
-    return "./txs_graph/datetime/txs_{start_in_filename}_{end_in_filename}.edgelist"
+    nx.write_weighted_edgelist(graph, f"./txs_graph/datetime/txs_{start_in_filename}_{end_in_filename}.edgelist")
+    print(f"Graph saved to ./txs_graph/datetime/txs_{start_in_filename}_{end_in_filename}.edgelist")
+    return f"./txs_graph/datetime/txs_{start_in_filename}_{end_in_filename}.edgelist"
 
 # Block data format
-# Verbosity 2
-# {'hash': '000000008be5151fa84c4eeec998e61cbcfdaf8123d610381d7e3c8c25af57d2', 'confirmations': 765338, 'height': 13367, 'version': 1, 'versionHex': '00000001', 'merkleroot': 'b43ef9ae423dcbcf0d0f838af1a9e3731d5a4ce9ebb0f8d12c9ab9c0f3f6d164', 'time': 1241514988, 'mediantime': 1241511732, 'nonce': 1714531103, 'bits': '1d00ffff', 'difficulty': 1, 'chainwork': '0000000000000000000000000000000000000000000000000000343834383438', 'nTx': 1, 'previousblockhash': '000000009ec410c470dd1d1e4dfbd6f67041893512903509ebe97e099cbeb548', 'nextblockhash': '000000001563e67bc1ed5022e837d97d34c3e78ed33e02d3051e177542c2bd3b', 'strippedsize': 216, 'size': 216, 'weight': 864, 'tx': [{'txid': 'b43efx9ae423dcbcf0d0f838af1a9e3731d5a4ce9ebb0f8d12c9ab9c0f3f6d164', 'hash': 'b43ef9ae423dcbcf0d0f838af1a9e3731d5a4ce9ebb0f8d12c9ab9c0f3f6d164', 'version': 1, 'size': 135, 'vsize': 135, 'weight': 540, 'locktime': 0, 'vin': [{'coinbase': '04ffff001d025e03', 'sequence': 4294967295}], 'vout': [{'value': 50.0, 'n': 0, 'scriptPubKey': {'asm': '044de751fd55346bda4070074b493981d024c26f2c3ebdf61822b642f8568e056b6ab0f26da7486f9f057eb31093154ee0740584e7347ae8c3212a66431f9d0353 OP_CHECKSIG', 'desc': 'pk(044de751fd55346bda4070074b493981d024c26f2c3ebdf61822b642f8568e056b6ab0f26da7486f9f057eb31093154ee0740584e7347ae8c3212a66431f9d0353)#fk322vlq', 'hex': '41044de751fd55346bda4070074b493981d024c26f2c3ebdf61822b642f8568e056b6ab0f26da7486f9f057eb31093154ee0740584e7347ae8c3212a66431f9d0353ac', 'type': 'pubkey'}}], 'hex': '01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0804ffff001d025e03ffffffff0100f2052a010000004341044de751fd55346bda4070074b493981d024c26f2c3ebdf61822b642f8568e056b6ab0f26da7486f9f057eb31093154ee0740584e7347ae8c3212a66431f9d0353ac00000000'}]}
 def tx_graph_timestamp(start_timestamp, end_timestamp):
-    # Get all of blocks' heights within timerange
-    # block_heights = block_heights_by_stamps(start_timestamp, end_timestamp)
-
     # Get all block hashes
     block_hashes = block_hashes_by_stamps(start_timestamp, end_timestamp)
 
@@ -64,14 +59,12 @@ def tx_graph_timestamp(start_timestamp, end_timestamp):
     return txs_to_multi_graph(transactions)
 
 def script_to_address(script):
-    # TODO IMPORTANT
+    # TODO IMPORTANT (after reading transaction secion of Mastering Bitcoin)
     pass
 
 def parse_tx(tx):
     # Calculate the total amount of inputs and outputs
     # TODO: for now assume that transaction data contains address information
-    # TEST with: 4ef6d37bc1110e1a49ab2f1724c82a5a3bd38bc25777284d8b13894059e77eae
-    # [{'txid': 'd3df0446522e514be223fe5affdce073222c113be2be8101e531d425e2598585', 'vout': 1, 'scriptSig': {'asm': '30440220509f2115e5f611bf0de6c5c2b8427f201586f4ce2ecb238b157098ac7a9bfdb202201de2ee97e3b2175ab037f4f43c54d6ba6601645ef8387bb3dedbbea6dd262017[ALL] 03548d2343a187741496b4e7983f962ec26c70d69d1b047877646453b8986f5c85', 'hex': '4730440220509f2115e5f611bf0de6c5c2b8427f201586f4ce2ecb238b157098ac7a9bfdb202201de2ee97e3b2175ab037f4f43c54d6ba6601645ef8387bb3dedbbea6dd262017012103548d2343a187741496b4e7983f962ec26c70d69d1b047877646453b8986f5c85'}, 'sequence': 4294967293}]
     input_addr_amount = []
     inputs = tx["vin"]
     for input in inputs:
@@ -84,7 +77,6 @@ def parse_tx(tx):
     output_addr_amount = []
     outputs = tx["vout"]
     for output in outputs:
-        # print(output)
         # TODO: we can skip null data, but need to do more research on what data we are skipping
         if 'address' not in output['scriptPubKey']:
             continue
@@ -143,8 +135,6 @@ def parse_tx(tx):
         print("output_addr_amount", output_addr_amount)
         # print("tx", tx)
         return []
-    # if output_ind < len(output_addr_amount):
-    #     print("ERROR: not all output values are used")
     # print("edges", edges)
     return edges
 
@@ -159,7 +149,6 @@ def txs_to_multi_graph(txs):
     MG=nx.MultiGraph()    
     # Add nodes
     print("start parsing txs")
-    # print(parse_txs(txs))
     MG.add_weighted_edges_from(parse_txs(txs))
     return MG
 
@@ -213,9 +202,7 @@ if __name__ == "__main__":
     print(f"Reading {filename}")
     MG = nx.read_weighted_edgelist(f"{filename}")
     print(dict(MG.degree(weight='weight')))
-    # G = nx.Graph()
-    # G.add_edge('A', 'B', weight=2.0)
-    # G.add_edge('B', 'C', weight=3.0)
 
-    # nx.write_weighted_edgelist(G, "txs_graph/datetime/txs_test_test.edgelis")
+    # Get transaction data of given block hash
+    # print(bitrpc.get_block("00000000000000000000ab6f2ba297568c9f7b1cdabb02ace83f1c18ac0642a3", 2))
 
