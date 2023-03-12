@@ -1,12 +1,7 @@
-# TODO
-# 1. Clone repository
-# 2. Install requirements (set environment variable)
-# 3. Run script (starting from 55000)
-
 import os
 import sys
 sys.path.insert(0, '../')
-from BitcoinTransactionGraph.bitcoinrpc.bitcoinrpc import BitcoinRpc
+from bitcoinrpc.bitcoinrpc import BitcoinRpc
 
 # Get environment variables
 rpc_user = os.environ['BITCOIN_RPC_USER']
@@ -79,16 +74,19 @@ def verify_missing_blocks():
         print("Missing following blocks: ", missing_blocks, "\n")
 
 # WARNING: Not tested yet, and not recommended (just use get_blocks_by_month() instead)
-def add_new_files(filename):
-    with open('blocks_data_total.csv', 'a') as f:
+def add_new_file(file_path):
+    last_line = ''
+    with open('blocks_data_total.csv', 'r') as f:
         lines = f.readlines()
         last_line = lines[-1]
+    current_block_height = int(last_line.split(',')[0]) + 1
+    with open('blocks_data_total.csv', 'a') as f:
         current_block_height = int(last_line.split(',')[0]) + 1
-        with open(filename, 'r') as f2:
+        with open(file_path, 'r') as f2:
             lines = f2.readlines()
             for line in reversed(lines):
                 line_split = line.split(',')
-                if line_split[0] == 'height':
+                if line_split[0].lower() == 'height':
                     continue
                 block_height = int(line_split[0])
                 if block_height < current_block_height:
@@ -97,10 +95,12 @@ def add_new_files(filename):
                     add_with_miss = input(print("Adding this file will cause missing blocks, do you still want to add it? (y/n)"))
                     if add_with_miss == 'n':
                         break
-                # Add block hash at the end of row
-                print("Retrieved block hash for block height: ", block_height)
-                block_hash = bitrpc.get_block_hash(block_height)
-                f.write(line.strip() + ',' + block_hash + '\n')
+                # Add block hash at the end of row - TODO: uncomment when using powerful machine
+                # print("Retrieved block hash for block height: ", block_height)
+                # block_hash = bitrpc.get_block_hash(block_height)
+                # f.write(line.strip() + ',' + block_hash + '\n')
+                # current_block_height += 1
+                f.write(line.strip() + '\n')
                 current_block_height += 1
 
 # WARNING: Not tested yet
@@ -138,7 +138,9 @@ if __name__ == '__main__':
         elif command == 2:
             get_number_of_blocks()
         elif command == 3:
-            file_name = input("Enter file name: ")
+            file_path = input("Enter file path: ").strip()
+            print(f"Adding {file_path}")
+            add_new_file(file_path)
         elif command == 4:
             verify_missing_blocks()
         elif command == 5:
