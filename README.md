@@ -8,6 +8,16 @@ Future:
 1. Try to construct the graph with data that do not have address fields
 Keegan's code: https://github.com/kjk6690/Cryptocurrency-Research/blob/main/old_data/block_724784.adjlist
 
+<!-- Before the meeting -->
+1. Create python file just for reading/playing around
+2. Spend little more time on "address" field (what can we do with non-address type transactions), not urgent though
+3. Maybe serialize object (try and compare the size of the file)
+ <!-- During meeting -->
+ 1. Change git permission
+ 2. Git pull
+ 3. Run program for creating edge list for a day
+ 4. Later, run a program for adding new blocks and hashes of new blocks
+
 # Bitcoin Transaction Graph
 
 ## Setup
