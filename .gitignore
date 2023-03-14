@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# some csv files
+get_block_data/blocks_by_month/*.csv
+
+# virtualenv
+graph
