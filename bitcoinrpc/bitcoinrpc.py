@@ -192,6 +192,22 @@ class BitcoinRpc():
             print("Error during get_raw_mempool:", response.status_code, response.reason)
             return -1
         
+    # Only available with wallet support
+    def list_transcations(self, label="*", count=10, skip=0, include_watchonly=True):
+        payload = json.dumps({
+            "method": "getrawmempool",
+            "params": [label, count, skip, include_watchonly],
+            "jsonrpc": "2.0",
+            "id": "0"
+        })
+        response = requests.post(self.url, headers=self.headers, data=payload)
+        if response.status_code == 200:
+            result = json.loads(response.text)['result']
+            return result
+        else:
+            print("Error during list_transcations:", response.status_code, response.reason)
+            return -1
+
     # TODO: 
     # savemempool
     # listunspent
