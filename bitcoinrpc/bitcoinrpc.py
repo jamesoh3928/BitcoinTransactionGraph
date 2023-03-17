@@ -191,7 +191,30 @@ class BitcoinRpc():
         else:
             print("Error during get_raw_mempool:", response.status_code, response.reason)
             return -1
+
+    def save_mempool(self):
+        """Dumps the mempool to disk. It will fail until the previous dump is fully loaded.
+           In save file in "/Users/Shared/bitcoin-core/DATA/mempool.dat"
+
+        Returns:
+            json: transaction information
+
+        """
+        payload = json.dumps({
+            "method": "savemempool",
+            "params": [],
+            "jsonrpc": "2.0",
+            "id": "0"
+        })
+        response = requests.post(self.url, headers=self.headers, data=payload)
+        if response.status_code == 200:
+            result = json.loads(response.text)['result']
+            return result
+        else:
+            print("Error during save_mempool:", response.status_code, response.reason)
+            return -1
         
+    # Commands below are only available with wallet support (have to enable wallet option in bitcoin.conf)
     # Only available with wallet support
     def list_transcations(self, label="*", count=10, skip=0, include_watchonly=True):
         payload = json.dumps({
@@ -207,8 +230,3 @@ class BitcoinRpc():
         else:
             print("Error during list_transcations:", response.status_code, response.reason)
             return -1
-
-    # TODO: 
-    # savemempool
-    # listunspent
-    # gettxout
