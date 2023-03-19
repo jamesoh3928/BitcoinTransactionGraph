@@ -230,3 +230,64 @@ class BitcoinRpc():
         else:
             print("Error during list_transcations:", response.status_code, response.reason)
             return -1
+
+        
+    def list_unspent(self, minconf=1, maxconf=9999999, addresses=[], include_unsafe=False, query_options=None):
+        """Returns array of unspent transaction outputs with between minconf and maxconf (inclusive) confirmations. 
+        Optionally filter to only include txouts paid to specified addresses. 
+        Results are an array of Objects, each of which has: 
+        {txid, vout, address, account, scriptPubKey, amount, confirmations}
+
+        Args:
+            minconf (int): The minimum confirmations to filter
+            maxconf (int): The maximum confirmations to filter
+            addresses (list): A json array of bitcoin addresses to filter
+            include_unsafe (boolean): Include outputs that are not safe to spend
+            query_options (dict): A json object with query options
+
+        Returns:
+            json: transaction information
+
+        """
+        params = [minconf, maxconf, addresses, include_unsafe]
+        if query_options is not None:
+            params.append(query_options)
+        payload = json.dumps({
+            "method": "listunspent",
+            "params": params,
+            "jsonrpc": "2.0",
+            "id": "0"
+        })
+        response = requests.post(self.url, headers=self.headers, data=payload)
+        if response.status_code == 200:
+            result = json.loads(response.text)['result']
+            return result
+        else:
+            print("Error during list_unspent:", response.status_code, response.reason)
+            return -1
+
+    def get_tx_out(self, txid, n, include_mempool=True):
+        """Returns details about an unspent transaction output.
+
+        Args:
+            txid (string): The transaction id
+            n (int): vout number
+            include_mempool (boolean): Whether to include the mempool. Note that an unspent output that is spent in the mempool won’t appear.
+
+        Returns:
+            json: transaction information
+
+        """
+        payload = json.dumps({
+            "method": "gettxout",
+            "params": [txid, n, include_mempool],
+            "jsonrpc": "2.0",
+            "id": "0"
+        })
+        response = requests.post(self.url, headers=self.headers, data=payload)
+        if response.status_code == 200:
+            result = json.loads(response.text)['result']
+            return result
+        else:
+            print("Error during get_tx_out:", response.status_code, response.reason)
+            return -1
