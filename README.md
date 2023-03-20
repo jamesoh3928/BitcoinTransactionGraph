@@ -1,4 +1,6 @@
 TODO
+1. Address: payment destination vs public key identifier
+2. Update readme
 - Re-read the transaction types in Mastering Bitcoin: https://github.com/bitcoinbook/bitcoinbook/blob/develop/ch06.asciidoc
 1. Use pickle to serialize the object (maybe later)
 2. Write code for reading and saving object (for reading create different file): for writing, write graph object to the file of name "tx_start_end"
