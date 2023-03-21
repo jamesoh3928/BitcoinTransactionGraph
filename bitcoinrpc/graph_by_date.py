@@ -197,11 +197,14 @@ def draw_graph(MG):
 
 # main function
 if __name__ == "__main__":
+    # bitcoinrpc test
+    print(bitrpc.list_unspent())
+
     # Get transaction of given time range
-    filename = tx_graph_datetime("2023/01/01 00:00:00", "2023/01/01 11:59:59")
-    print(f"Reading {filename}")
-    MG = nx.read_weighted_edgelist(f"{filename}")
-    print(dict(MG.degree(weight='weight')))
+    # filename = tx_graph_datetime("2023/01/01 00:00:00", "2023/01/01 11:59:59")
+    # print(f"Reading {filename}")
+    # MG = nx.read_weighted_edgelist(f"{filename}")
+    # print(dict(MG.degree(weight='weight')))
 
     # Get transaction data of given block hash
     # print(bitrpc.get_block("00000000000000000000ab6f2ba297568c9f7b1cdabb02ace83f1c18ac0642a3", 2))
