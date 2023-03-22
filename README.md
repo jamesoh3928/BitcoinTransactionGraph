@@ -42,7 +42,9 @@ You would have to set `BITCOIN_RPC_USER` and `BITCOIN_RPC_PASSWORD` as environme
 
 ### Types of Transactions
 
-## How to use it
+
+## How to use BitcoinRPC
+## How add new block data
 
 ### TODO List
 1. Modularize the rpc requests (for now, only implement the ones we need)
