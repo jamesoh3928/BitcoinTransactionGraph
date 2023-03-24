@@ -2,10 +2,22 @@ import networkx as nx
 
 # Read graph file in txs_graph
 def read_txs_graph(file_path):
-    print(f"Reading {file_path}")
-    MG = nx.read_weighted_edgelist(f"{file_path}")
-    # Add things you want to do
-    print(dict(MG.degree(weight='weight')))
+    # read the edge list file
+    with open(file_path) as f:
+        edges = [line.strip().split() for line in f]
+
+    # create a new directed multigraph
+    MDG = nx.MultiDiGraph()
+
+    # add the edges to the graph
+    for edge in edges:
+        MDG.add_edge(edge[0], edge[1], weight=float(edge[2]))
+
+    # TODO delete
+    # print the nodes and edges in the graph
+    print("Nodes:", MDG.nodes())
+    print("Edges:", MDG.edges(data=True))
+    return MDG
 
 # main function
 if __name__ == "__main__":
