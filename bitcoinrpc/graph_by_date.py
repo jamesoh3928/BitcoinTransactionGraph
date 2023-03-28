@@ -1,4 +1,3 @@
-# TODO: transfer bitcoin data to graph objects
 # Add documentation saying that every time is in UTC
 import os
 from bitcoinrpc import BitcoinRpc
@@ -6,9 +5,6 @@ from datetime import datetime
 
 import networkx as nx
 import matplotlib.pyplot as plt
-
-# TODO: delete
-import json
 
 # Networkx
 # https://networkx.org/documentation/stable/tutorial.html
@@ -64,12 +60,12 @@ def tx_graph_timestamp(start_timestamp, end_timestamp):
     return txs_to_multi_graph(transactions)
 
 def script_to_address(script):
-    # TODO IMPORTANT (after reading transaction secion of Mastering Bitcoin)
+    # TODO IMPORTANT (after reading transaction section of Mastering Bitcoin)
     pass
 
 def parse_tx(tx, miner_address):
     # Calculate the total amount of inputs and outputs
-    # TODO: for now assume that transaction data contains address information
+    # TODO: for now, only consider transactions that contain `address` field
     input_addr_amount = []
     inputs = tx["vin"]
     is_coinbase = False
@@ -92,7 +88,7 @@ def parse_tx(tx, miner_address):
             miner_address[0] = output['scriptPubKey']['address']
         output_addr_amount.append((output['scriptPubKey']['address'], output['value']))
 
-    # TODO: check if input and output values are equal (including transaction fee)
+    # Check if input and output values are equal (including transaction fee)
     sum_input = sum([input_amount for _, input_amount in input_addr_amount])
     sum_output = sum([output_amount for _, output_amount in output_addr_amount])
     tx_fee = sum_input - sum_output
@@ -101,7 +97,8 @@ def parse_tx(tx, miner_address):
     # For each input, create an edge to output address until all values are used
     # if all values are used, then create an edge to the next input address
     output_ind = 0
-    # TODO: transaction fee (for now, just add output to first input address)
+
+    # transaction fee (for now, just add output to miner)
     if tx_fee > 0:
         output_addr_amount.append((miner_address[0], tx_fee))
 
@@ -121,7 +118,7 @@ def parse_tx(tx, miner_address):
                 output_addr_amount[output_ind] = (output_addr, output_amount)
                 input_amount = 0
     
-    # TODO: change this to check if all input values are used (sum values in edges)
+    # Check if all input values are used (sum values in edges)
     sum_edges = round(sum([edge_amount for _, _, edge_amount in edges]), 8)
     if sum_edges != round(sum_input, 8):
         print("ERROR: sum of edges is not equal to sum of input values")
@@ -131,6 +128,7 @@ def parse_tx(tx, miner_address):
         print("input_addr_amount", input_addr_amount)
         print("output_addr_amount", output_addr_amount)
         return []
+    
     return edges
 
 def parse_txs(txs):
@@ -139,6 +137,7 @@ def parse_txs(txs):
     for tx in txs:
         # TODO clean up
         test = parse_tx(tx, miner_address)
+        # TODO delete
         print(test)
         result.extend(test)
     return result
