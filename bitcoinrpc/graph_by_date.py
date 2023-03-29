@@ -1,4 +1,3 @@
-# TODO: transfer bitcoin data to graph objects
 # Add documentation saying that every time is in UTC
 import os
 from bitcoinrpc import BitcoinRpc
@@ -32,11 +31,13 @@ def tx_graph_date(start_date, end_date):
 # Format of datetime: %Y/%m/%d %H:%M:%S (always UTC)
 def tx_graph_datetime(start_datetime, end_datetime):
     # Convert datetime in format yyyy/mm/dd hh:mm:ss to UNIX epoch time
-    start_timestamp = datetime.strptime(start_datetime, "%Y/%m/%d %H:%M:%S").timestamp()
-    end_timestamp = datetime.strptime(end_datetime, "%Y/%m/%d %H:%M:%S").timestamp()
+    start_datetime = datetime.strptime("2023/01/01 09:00:00", "%Y/%m/%d %H:%M:%S")
+    end_datetime = datetime.strptime("2023/01/01 09:15:00", "%Y/%m/%d %H:%M:%S")
+    start_timestamp = start_datetime.timestamp()
+    end_timestamp = end_datetime.timestamp()
     graph = tx_graph_timestamp(start_timestamp, end_timestamp)
-    start_in_filename = start_timestamp.strftime("%Y.%m.%d.%H.%M.%S")
-    end_in_filename = end_timestamp.strftime("%Y.%m.%d.%H.%M.%S")
+    start_in_filename = start_datetime.strftime("%Y.%m.%d.%H.%M.%S")
+    end_in_filename = end_datetime.strftime("%Y.%m.%d.%H.%M.%S")
     nx.write_weighted_edgelist(graph, f"./txs_graph/datetime/txs_{start_in_filename}_{end_in_filename}.edgelist")
     print(f"Graph saved to ./txs_graph/datetime/txs_{start_in_filename}_{end_in_filename}.edgelist")
     return f"./txs_graph/datetime/txs_{start_in_filename}_{end_in_filename}.edgelist"
@@ -59,16 +60,18 @@ def tx_graph_timestamp(start_timestamp, end_timestamp):
     return txs_to_multi_graph(transactions)
 
 def script_to_address(script):
-    # TODO IMPORTANT (after reading transaction secion of Mastering Bitcoin)
+    # TODO IMPORTANT (after reading transaction section of Mastering Bitcoin)
     pass
 
-def parse_tx(tx):
+def parse_tx(tx, miner_address):
     # Calculate the total amount of inputs and outputs
-    # TODO: for now assume that transaction data contains address information
+    # TODO: for now, only consider transactions that contain `address` field
     input_addr_amount = []
     inputs = tx["vin"]
+    is_coinbase = False
     for input in inputs:
         if 'coinbase' in input:
+            is_coinbase = True
             continue
         ind = input["vout"]
         prev_output = bitrpc.get_raw_transaction(input["txid"], True)['vout'][ind]
@@ -77,37 +80,28 @@ def parse_tx(tx):
     output_addr_amount = []
     outputs = tx["vout"]
     for output in outputs:
-        # TODO: we can skip null data, but need to do more research on what data we are skipping
+        # We skip null data, but need to do more research on what data we are skipping
         if 'address' not in output['scriptPubKey']:
             continue
-        if 'coinbase' in input:
-            # TODO maybe come up with better representation
+        if is_coinbase:
             input_addr_amount.append((-1, output['value']))
+            miner_address[0] = output['scriptPubKey']['address']
         output_addr_amount.append((output['scriptPubKey']['address'], output['value']))
 
-    # TODO: check if input and output values are equal (including transaction fee)
+    # Check if input and output values are equal (including transaction fee)
     sum_input = sum([input_amount for _, input_amount in input_addr_amount])
     sum_output = sum([output_amount for _, output_amount in output_addr_amount])
     tx_fee = sum_input - sum_output
-    # if 'coinbase' not in input:
-    #     sum_output += tx['fee']
-    # if sum_input != sum_output:
-    #     print("ERROR: input and output values are not equal")
-    #     print("sum_input", sum_input)
-    #     print("sum_output (including transaction fee)", sum_output)
-    #     print("input_addr_amount", input_addr_amount)
-    #     print("output_addr_amount", output_addr_amount)
-    #     print("tx fee", tx['fee'])
-    #     # print("tx", tx)
-    #     return []
 
     edges = []
     # For each input, create an edge to output address until all values are used
     # if all values are used, then create an edge to the next input address
     output_ind = 0
-    # TODO: transaction fee (for now, just add to first input address)
+
+    # transaction fee (for now, just add output to miner)
     if tx_fee > 0:
-        edges.append((input_addr_amount[0][0], -1, tx_fee))
+        output_addr_amount.append((miner_address[0], tx_fee))
+
     for input_addr, input_amount in input_addr_amount:
         while output_ind < len(output_addr_amount):
             output_addr, output_amount = output_addr_amount[output_ind]
@@ -124,7 +118,7 @@ def parse_tx(tx):
                 output_addr_amount[output_ind] = (output_addr, output_amount)
                 input_amount = 0
     
-    # TODO: change this to check if all input values are used (sum values in edges)
+    # Check if all input values are used (sum values in edges)
     sum_edges = round(sum([edge_amount for _, _, edge_amount in edges]), 8)
     if sum_edges != round(sum_input, 8):
         print("ERROR: sum of edges is not equal to sum of input values")
@@ -133,20 +127,24 @@ def parse_tx(tx):
         print("edges", edges)
         print("input_addr_amount", input_addr_amount)
         print("output_addr_amount", output_addr_amount)
-        # print("tx", tx)
         return []
-    # print("edges", edges)
+    
     return edges
 
 def parse_txs(txs):
     result = []
+    miner_address = [None]
     for tx in txs:
-        result.extend(parse_tx(tx))
+        # TODO clean up
+        test = parse_tx(tx, miner_address)
+        # TODO delete
+        print(test)
+        result.extend(test)
     return result
 
 def txs_to_multi_graph(txs):
     # Create graph
-    MG=nx.MultiGraph()    
+    MG=nx.MultiDiGraph()    
     # Add nodes
     print("start parsing txs")
     MG.add_weighted_edges_from(parse_txs(txs))
@@ -198,14 +196,20 @@ def draw_graph(MG):
 # main function
 if __name__ == "__main__":
     # bitcoinrpc test
-    print(bitrpc.list_unspent())
+    # print(bitrpc.list_unspent())
 
     # Get transaction of given time range
-    # filename = tx_graph_datetime("2023/01/01 00:00:00", "2023/01/01 11:59:59")
-    # print(f"Reading {filename}")
-    # MG = nx.read_weighted_edgelist(f"{filename}")
-    # print(dict(MG.degree(weight='weight')))
+    filename = tx_graph_datetime("2023/01/01 09:00:00", "2023/01/01 09:15:00")
+    print(f"Reading {filename}")
+    MG = nx.read_weighted_edgelist(f"{filename}")
+    print(dict(MG.degree(weight='weight')))
 
     # Get transaction data of given block hash
     # print(bitrpc.get_block("00000000000000000000ab6f2ba297568c9f7b1cdabb02ace83f1c18ac0642a3", 2))
+
+    # Test parse_tx
+    # Read from test.txt and load entire file into JSON, and run parse_tx
+    # block_data = bitrpc.get_block("00000000000000000000ab6f2ba297568c9f7b1cdabb02ace83f1c18ac0642a3", 2)
+    # txs = block_data['tx']
+    # print(parse_txs(txs))
 

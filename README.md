@@ -2,23 +2,22 @@ TODO
 1. Address: payment destination vs public key identifier
 2. Update readme
 - Re-read the transaction types in Mastering Bitcoin: https://github.com/bitcoinbook/bitcoinbook/blob/develop/ch06.asciidoc
+3. Maybe serialize object (try and compare the size of the file)
+
+
+Maybe Later
 1. Use pickle to serialize the object (maybe later)
-2. Write code for reading and saving object (for reading create different file): for writing, write graph object to the file of name "tx_start_end"
-3. pip freeze > requirements. txt
-4. Push code and test it on better machine
+3. pip freeze > requirements.txt (if new pip is added)
+
 Future:
 1. Try to construct the graph with data that do not have address fields
 Keegan's code: https://github.com/kjk6690/Cryptocurrency-Research/blob/main/old_data/block_724784.adjlist
 
-<!-- Before the meeting -->
-1. Create python file just for reading/playing around
-2. Spend little more time on "address" field (what can we do with non-address type transactions), not urgent though
-3. Maybe serialize object (try and compare the size of the file)
  <!-- During meeting -->
- 1. Change git permission
- 2. Git pull
- 3. Run program for creating edge list for a day
- 4. Later, run a program for adding new blocks and hashes of new blocks
+ 1. Discussion 
+ 2. SSH setup
+ 3. Try git pull
+ 4. Run one day of transaction data
 
 # Bitcoin Transaction Graph
 
@@ -45,17 +44,3 @@ You would have to set `BITCOIN_RPC_USER` and `BITCOIN_RPC_PASSWORD` as environme
 
 ## How to use BitcoinRPC
 ## How add new block data
-
-### TODO List
-1. Modularize the rpc requests (for now, only implement the ones we need)
-- getblockchaininfo
-- getblock
-- get
-- getrawtransaction
-- decoderawtransaction
-- getrawmempool
-2. Use it to construct the graph
-- calculate the data based on the input
-- get all hashes of the blocks
-- get all transactions
-- construct a graph object
