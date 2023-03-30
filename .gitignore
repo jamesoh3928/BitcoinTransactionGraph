@@ -130,6 +130,9 @@ dmypy.json
 
 # some csv files
 get_block_data/blocks_by_month/*.csv
+bitcoinrpc/assets/*.csv
+get_block_data/*.csv
+get_block_data/blocks_data_total.csv
 
 # virtualenv
 graph

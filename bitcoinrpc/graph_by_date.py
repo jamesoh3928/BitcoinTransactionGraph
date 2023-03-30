@@ -199,7 +199,7 @@ if __name__ == "__main__":
     # print(bitrpc.list_unspent())
 
     # Get transaction of given time range
-    filename = tx_graph_datetime("2023/01/01 09:00:00", "2023/01/01 09:15:00")
+    filename = tx_graph_datetime("2023/01/01 00:00:00", "2023/01/02 00:00:00")
     print(f"Reading {filename}")
     MG = nx.read_weighted_edgelist(f"{filename}")
     print(dict(MG.degree(weight='weight')))
