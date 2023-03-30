@@ -31,8 +31,8 @@ def tx_graph_date(start_date, end_date):
 # Format of datetime: %Y/%m/%d %H:%M:%S (always UTC)
 def tx_graph_datetime(start_datetime, end_datetime):
     # Convert datetime in format yyyy/mm/dd hh:mm:ss to UNIX epoch time
-    start_datetime = datetime.strptime("start_datetime", "%Y/%m/%d %H:%M:%S")
-    end_datetime = datetime.strptime("end_datetime", "%Y/%m/%d %H:%M:%S")
+    start_datetime = datetime.strptime(start_datetime, "%Y/%m/%d %H:%M:%S")
+    end_datetime = datetime.strptime(end_datetime, "%Y/%m/%d %H:%M:%S")
     start_timestamp = start_datetime.timestamp()
     end_timestamp = end_datetime.timestamp()
     graph = tx_graph_timestamp(start_timestamp, end_timestamp)
