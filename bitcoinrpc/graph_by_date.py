@@ -169,7 +169,7 @@ def block_heights_by_stamps(start_timestamp, end_timestamp):
 
 def block_hashes_by_stamps(start_timestamp, end_timestamp):
     block_hashes = []
-    with open('./assets/blocks_data_total_copy.csv', 'r') as f1:
+    with open('./assets/blocks_data_total.csv', 'r') as f1:
         lines = f1.readlines()
         # TODO: maybe stop after extra 11 lines if slow
         # Scan through blockchain until it sees the end date, and 11 extra since 
