@@ -75,6 +75,9 @@ def parse_tx(tx, miner_address):
             continue
         ind = input["vout"]
         prev_output = bitrpc.get_raw_transaction(input["txid"], True)['vout'][ind]
+        # TODO: double check this kind of information
+        if 'address' not in prev_output['scriptPubKey']:
+            continue
         input_addr_amount.append((prev_output['scriptPubKey']['address'], prev_output['value']))
     
     output_addr_amount = []
