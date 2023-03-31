@@ -119,7 +119,10 @@ def add_block_hashes(start_height, end_height):
             elif block_height > end_height:
                 break
             block_hash = bitrpc.get_block_hash(block_height)
-            print("Retrieved block hash for block height: ", block_height)
+            if block_hash == -1:
+                print("Error: block hash not found for block height: ", block_height)
+            else:
+                print("Retrieved block hash for block height: ", block_height)
             lines[i] = line.strip() + ',' + block_hash + '\n'
     with open('blocks_data_total.csv', 'w') as f:
         f.writelines(lines)
