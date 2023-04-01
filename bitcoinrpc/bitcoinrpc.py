@@ -291,3 +291,34 @@ class BitcoinRpc():
         else:
             print("Error during get_tx_out:", response.status_code, response.reason)
             return -1
+        
+    def get_mempool_info(self):
+        """Returns details on the active state of the TX memory pool.
+
+        Returns:
+            json: transaction information
+
+        """
+        payload = json.dumps({
+            "method": "getmempoolinfo",
+            "params": [],
+            "jsonrpc": "2.0",
+            "id": "0"
+        })
+        response = requests.post(self.url, headers=self.headers, data=payload)
+        if response.status_code == 200:
+            result = json.loads(response.text)['result']
+            return result
+        else:
+            print("Error during get_mempool_info:", response.status_code, response.reason)
+            return -1
+        
+
+# Look into scantxoutset
+# 
+# MEMPOOL commands
+# getmempoolentry: This command returns information about a specific transaction in the mempool, such as its fee rate, size, and dependencies. You can use this command to get detailed information about a specific transaction that you see in the mempool.dat file.
+
+# getrawmempool: This command returns a list of all transaction IDs in the mempool. You can use this command to get a list of all transactions in the mempool, which you can then analyze further using other commands.
+
+# estimatesmartfee: This command estimates the fee rate (in satoshis per byte) needed for a transaction to be confirmed within a certain number of blocks. You can use this command to estimate the fee rate needed for a transaction to be included in the mempool or to be confirmed by miners.
