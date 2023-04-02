@@ -1,5 +1,6 @@
 # Add documentation saying that every time is in UTC
 import os
+import json
 from bitcoinrpc import BitcoinRpc
 from datetime import datetime
 
@@ -199,7 +200,8 @@ def draw_graph(MG):
 # main function
 if __name__ == "__main__":
     # bitcoinrpc test
-    # print(bitrpc.list_unspent())
+    # print(json.dumps(bitrpc.get_mempool_info()))
+    # print(json.dumps(bitrpc.list_unspent()))
 
     # Get transaction of given time range
     filename = tx_graph_datetime("2023/01/01 00:00:00", "2023/01/02 00:00:00")
@@ -209,10 +211,4 @@ if __name__ == "__main__":
 
     # Get transaction data of given block hash
     # print(bitrpc.get_block("00000000000000000000ab6f2ba297568c9f7b1cdabb02ace83f1c18ac0642a3", 2))
-
-    # Test parse_tx
-    # Read from test.txt and load entire file into JSON, and run parse_tx
-    # block_data = bitrpc.get_block("00000000000000000000ab6f2ba297568c9f7b1cdabb02ace83f1c18ac0642a3", 2)
-    # txs = block_data['tx']
-    # print(parse_txs(txs))
 
