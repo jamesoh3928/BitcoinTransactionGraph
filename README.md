@@ -7,10 +7,9 @@ TODO
 
 Maybe Later
 1. Use pickle to serialize the object (maybe later)
-3. pip freeze > requirements.txt (if new pip is added)
 
 Future:
-1. Try to construct the graph with data that do not have address fields
+1. Try to construct the graph with data that do not have address fields (is this meaningful?)
 Keegan's code: https://github.com/kjk6690/Cryptocurrency-Research/blob/main/old_data/block_724784.adjlist
 
  <!-- During meeting -->
