@@ -192,6 +192,7 @@ def block_hashes_by_stamps(start_timestamp, end_timestamp):
                     block_hashes.append(line_split[9].strip())
     return block_hashes
 
+# Not drawing visible graph (too many edges)
 def draw_graph(MG):
     plt.figure(1)
     nx.draw(MG, with_labels=True, font_weight='bold')

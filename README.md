@@ -12,12 +12,6 @@ Future:
 1. Try to construct the graph with data that do not have address fields (is this meaningful?)
 Keegan's code: https://github.com/kjk6690/Cryptocurrency-Research/blob/main/old_data/block_724784.adjlist
 
- <!-- During meeting -->
- 1. Discussion 
- 2. SSH setup
- 3. Try git pull
- 4. Run one day of transaction data
-
 # Bitcoin Transaction Graph
 
 ## Setup
