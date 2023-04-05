@@ -56,8 +56,6 @@ def tx_graph_timestamp(start_timestamp, end_timestamp):
         print("Got block data for block hash: " + block_hash)
         transactions.extend(block_data['tx'])
 
-    # TODO
-    # Locking script = scriptPubKey
     return txs_to_multi_graph(transactions)
 
 def script_to_address(script):
@@ -139,7 +137,6 @@ def parse_txs(txs):
     result = []
     miner_address = [None]
     for tx in txs:
-        # TODO clean up
         test = parse_tx(tx, miner_address)
         # TODO delete
         print(test)
@@ -158,10 +155,6 @@ def block_heights_by_stamps(start_timestamp, end_timestamp):
     block_heights = []
     with open('./assets/blocks_data_total.csv', 'r') as f1:
         lines = f1.readlines()
-        # TODO: maybe stop after extra 11 lines if slow
-        # Scan through blockchain until it sees the end date, and 11 extra since 
-        # the chain accepts a block that is higher than median timestamp of 11 blocks
-        # https://bitcoin.stackexchange.com/questions/915/why-dont-the-timestamps-in-the-block-chain-always-increase
         lines = lines[1:]
         for line in lines:
             block_time = line.split(',')[2]
@@ -175,10 +168,6 @@ def block_hashes_by_stamps(start_timestamp, end_timestamp):
     block_hashes = []
     with open('./assets/blocks_data_total.csv', 'r') as f1:
         lines = f1.readlines()
-        # TODO: maybe stop after extra 11 lines if slow
-        # Scan through blockchain until it sees the end date, and 11 extra since 
-        # the chain accepts a block that is higher than median timestamp of 11 blocks
-        # https://bitcoin.stackexchange.com/questions/915/why-dont-the-timestamps-in-the-block-chain-always-increase
         lines = lines[1:]
         for line in lines:
             line_split = line.split(',')
