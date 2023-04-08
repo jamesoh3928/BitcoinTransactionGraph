@@ -38,4 +38,34 @@ if __name__ == "__main__":
     # Get all block hashes
     block_hashes = block_hashes_by_heights(start_height, end_height)
 
-    # Count the number of transactions of each type
+    # Create file ./assets/txs_types_stats.csv
+    with open('./assets/txs_types_stats.csv', 'w') as f1:
+        # TODO update all types
+        f1.write("date_UTC, num_p2sh, num_p2pkh")
+                 
+    # Count the number of transactions output of each type
+    data_by_date = {}
+    for block_hash in block_hashes:
+        block = bitrpc.get_block(block_hash, 2)
+        block_time = block['time']
+        block_time = datetime.utcfromtimestamp(block_time).strftime('%Y-%m-%d')
+        for tx in block['tx']:
+            for vout in tx['vout']:
+                script_type = vout['scriptPubKey']['type']
+                if block_time in data_by_date:
+                    if script_type in data_by_date[block_time]:
+                        data_by_date[block_time][script_type] += 1
+                    else:
+                        data_by_date[block_time][script_type] = 1
+                else:
+                    data_by_date[block_time] = {}
+                    data_by_date[block_time][script_type] = 1
+
+    # Write data to file
+    with open('./assets/txs_types_stats.csv', 'a') as f1:
+        for date in data_by_date:
+            f1.write(date + ', ')
+            for script_type in data_by_date[date]:
+                # Write type
+                f1.write(script_type + ': ')
+                f1.write(str(data_by_date[date][script_type]) + ', ')
