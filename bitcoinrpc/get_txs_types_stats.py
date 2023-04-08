@@ -21,28 +21,14 @@ def block_hashes_by_heights(start_height, end_height):
         lines = lines[1:]
         for line in lines:
             line_split = line.split(',')
-            block_height = int(line_split[1])
+            block_height = int(line_split[0])
             if block_height > end_height:
                 break
             elif block_height >= start_height and block_height <= end_height:
                 block_hashes.append(line_split[9].strip())
     return block_hashes
 
-# main function
-if __name__ == "__main__":
-    start_height = int(input("Enter a starting block height: "))
-    end_height = int(input("Enter an ending block height: "))
-    if start_height > end_height:
-        print("Error: starting block is greater than ending block")
-        exit(1)
-    # Get all block hashes
-    block_hashes = block_hashes_by_heights(start_height, end_height)
-
-    # Create file ./assets/txs_types_stats.csv
-    with open('./assets/txs_types_stats.csv', 'w') as f1:
-        # TODO update all types
-        f1.write("date_UTC, num_p2sh, num_p2pkh")
-                 
+def write_tx_types_data(block_hashes, start_height, end_height):
     # Count the number of transactions output of each type
     data_by_date = {}
     for block_hash in block_hashes:
@@ -62,10 +48,26 @@ if __name__ == "__main__":
                     data_by_date[block_time][script_type] = 1
 
     # Write data to file
-    with open('./assets/txs_types_stats.csv', 'a') as f1:
+    # pubkey, witness_v0_keyhash: 4763, nulldata: 22, pubkeyhash: 2885, scripthash: 4480, witness_v0_scripthash: 663, witness_v1_taproot: 52
+    with open(f'./txs_types_stats/{start_height}_to_{end_height}.csv', 'w') as f1:
         for date in data_by_date:
             f1.write(date + ', ')
             for script_type in data_by_date[date]:
                 # Write type
                 f1.write(script_type + ': ')
                 f1.write(str(data_by_date[date][script_type]) + ', ')
+            f1.write('\n')
+
+# main function
+if __name__ == "__main__":
+    start_height = int(input("Enter a starting block height: "))
+    end_height = int(input("Enter an ending block height: "))
+    if start_height > end_height:
+        print("Error: starting block is greater than ending block")
+        exit(1)
+    # Get all block hashes
+    block_hashes = block_hashes_by_heights(start_height, end_height)
+    
+    # Get the number of transactions of each type per day
+    write_tx_types_data(block_hashes, start_height, end_height)
+    
