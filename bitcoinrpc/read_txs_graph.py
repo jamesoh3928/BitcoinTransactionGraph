@@ -22,4 +22,4 @@ def read_txs_graph(file_path):
 # main function
 if __name__ == "__main__":
     # Get transaction of given time range
-    read_txs_graph("txs_graph/datetime/txs_2023.01.01.09.00.00_2023.01.01.09.15.00.edgelist")
+    read_txs_graph("txs_graph/datetime_with_height/txs_2023.01.01.09.00.00_2023.01.01.09.15.00.edgelist")
