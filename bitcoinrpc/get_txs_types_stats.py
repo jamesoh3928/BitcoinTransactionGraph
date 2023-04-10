@@ -30,11 +30,25 @@ def block_hashes_by_heights(start_height, end_height):
 
 def write_tx_types_data(block_hashes, start_height, end_height):
     # Count the number of transactions output of each type
+    # Create or reset the file
+    with open(f'./txs_types_stats/{start_height}_to_{end_height}.csv', 'w') as f1:
+        f1.write('')
     data_by_date = {}
+    cur_date = ""
     for block_hash in block_hashes:
         block = bitrpc.get_block(block_hash, 2)
         block_time = block['time']
         block_time = datetime.utcfromtimestamp(block_time).strftime('%Y-%m-%d')
+        if block_time != cur_date and cur_date != "":
+            with open(f'./txs_types_stats/{start_height}_to_{end_height}.csv', 'a') as f1:
+                f1.write(cur_date + ', ')
+                for script_type in data_by_date[cur_date]:
+                    # Write type
+                    f1.write(script_type + ': ')
+                    f1.write(str(data_by_date[cur_date][script_type]) + ', ')
+                f1.write('\n')
+            cur_date = block_time
+            del data_by_date[cur_date]
         for tx in block['tx']:
             for vout in tx['vout']:
                 script_type = vout['scriptPubKey']['type']
@@ -47,16 +61,15 @@ def write_tx_types_data(block_hashes, start_height, end_height):
                     data_by_date[block_time] = {}
                     data_by_date[block_time][script_type] = 1
 
-    # Write data to file
     # pubkey, witness_v0_keyhash: 4763, nulldata: 22, pubkeyhash: 2885, scripthash: 4480, witness_v0_scripthash: 663, witness_v1_taproot: 52
-    with open(f'./txs_types_stats/{start_height}_to_{end_height}.csv', 'w') as f1:
-        for date in data_by_date:
-            f1.write(date + ', ')
-            for script_type in data_by_date[date]:
-                # Write type
-                f1.write(script_type + ': ')
-                f1.write(str(data_by_date[date][script_type]) + ', ')
-            f1.write('\n')
+    # with open(f'./txs_types_stats/{start_height}_to_{end_height}.csv', 'w') as f1:
+    #     for date in data_by_date:
+    #         f1.write(date + ', ')
+    #         for script_type in data_by_date[date]:
+    #             # Write type
+    #             f1.write(script_type + ': ')
+    #             f1.write(str(data_by_date[date][script_type]) + ', ')
+    #         f1.write('\n')
 
 # main function
 if __name__ == "__main__":
