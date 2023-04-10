@@ -1,14 +1,12 @@
-# Add documentation saying that every time is in UTC
+# All dates in this program in based on UTC time
+# TODO: rerun the program
+
 import os
-import json
 from bitcoinrpc import BitcoinRpc
 from datetime import datetime
 
 import networkx as nx
 import matplotlib.pyplot as plt
-
-# Networkx
-# https://networkx.org/documentation/stable/tutorial.html
 
 # Get environment variables
 rpc_user = os.environ['BITCOIN_RPC_USER']
@@ -17,7 +15,6 @@ rpc_host = "localhost"
 rpc_port = 8332
 bitrpc = BitcoinRpc(rpc_user, rpc_password, rpc_host, rpc_port)
 
-# TODO: when excel file does not have data, it will return error or call RPC manually
 # Get transaction data of given date (start_date is included, end_date is excluded)
 def tx_graph_date(start_date, end_date):
     # Convert date in format yyyy/mm/dd to UNIX epoch time
@@ -34,22 +31,47 @@ def tx_graph_datetime(start_datetime, end_datetime):
     # Convert datetime in format yyyy/mm/dd hh:mm:ss to UNIX epoch time
     start_datetime = datetime.strptime(start_datetime, "%Y/%m/%d %H:%M:%S")
     end_datetime = datetime.strptime(end_datetime, "%Y/%m/%d %H:%M:%S")
+    filename = write_graph(start_datetime, end_datetime)
+    print(f"Graph saved to {filename}")
+    return filename
+
+# Directly write graph data to the file instead of creating networkx object
+def write_graph(start_datetime, end_datetime):
     start_timestamp = start_datetime.timestamp()
     end_timestamp = end_datetime.timestamp()
-    graph = tx_graph_timestamp(start_timestamp, end_timestamp)
     start_in_filename = start_datetime.strftime("%Y.%m.%d.%H.%M.%S")
     end_in_filename = end_datetime.strftime("%Y.%m.%d.%H.%M.%S")
-    nx.write_weighted_edgelist(graph, f"./txs_graph/datetime/txs_{start_in_filename}_{end_in_filename}.edgelist")
-    print(f"Graph saved to ./txs_graph/datetime/txs_{start_in_filename}_{end_in_filename}.edgelist")
-    return f"./txs_graph/datetime/txs_{start_in_filename}_{end_in_filename}.edgelist"
+    filename = f"./txs_graph/datetime_with_height/txs_{start_in_filename}_{end_in_filename}.edgelist"
 
-# Block data format
+    # Get all block hashes
+    block_hashes = block_hashes_by_stamps(start_timestamp, end_timestamp)
+
+    # Create or reset the file
+    with open(filename, 'w') as f1:
+        f1.write('')
+
+    for block_hash in block_hashes:
+        print("Getting block data for block hash: " + block_hash)
+        block_data = bitrpc.get_block(block_hash, 2)
+        print("Got block data for block hash: " + block_data['hash'])
+        block_height = block_data['height']
+        miner_address = [None]
+        for tx in block_data['tx']:
+            transactions = parse_tx(tx, miner_address)
+            for transaction in transactions:
+                # from, to, amount, block_height
+                print(transaction)
+                with open(filename, 'a') as f:
+                    f.write(f"{transaction[0]}, {transaction[1]} {transaction[2]} {block_height}\n")
+
+    return filename
+
+# Create networkx graph object of transaction for given timestamp
 def tx_graph_timestamp(start_timestamp, end_timestamp):
     # Get all block hashes
     block_hashes = block_hashes_by_stamps(start_timestamp, end_timestamp)
 
     transactions = []
-
     for block_hash in block_hashes:
         print("Getting block data for block hash: " + block_hash)
         block_data = bitrpc.get_block(block_hash, 2)
@@ -57,10 +79,6 @@ def tx_graph_timestamp(start_timestamp, end_timestamp):
         transactions.extend(block_data['tx'])
 
     return txs_to_multi_graph(transactions)
-
-def script_to_address(script):
-    # TODO IMPORTANT (after reading transaction section of Mastering Bitcoin)
-    pass
 
 def parse_tx(tx, miner_address):
     # Calculate the total amount of inputs and outputs
@@ -74,7 +92,6 @@ def parse_tx(tx, miner_address):
             continue
         ind = input["vout"]
         prev_output = bitrpc.get_raw_transaction(input["txid"], True)['vout'][ind]
-        # TODO: double check this kind of information
         if 'address' not in prev_output['scriptPubKey']:
             continue
         input_addr_amount.append((prev_output['scriptPubKey']['address'], prev_output['value']))
@@ -95,9 +112,9 @@ def parse_tx(tx, miner_address):
     sum_output = sum([output_amount for _, output_amount in output_addr_amount])
     tx_fee = sum_input - sum_output
 
-    edges = []
     # For each input, create an edge to output address until all values are used
     # if all values are used, then create an edge to the next input address
+    edges = []
     output_ind = 0
 
     # transaction fee (for now, just add output to miner)
@@ -137,12 +154,11 @@ def parse_txs(txs):
     result = []
     miner_address = [None]
     for tx in txs:
-        test = parse_tx(tx, miner_address)
-        # TODO delete
-        print(test)
-        result.extend(test)
+        edges = parse_tx(tx, miner_address)
+        result.extend(edges)
     return result
 
+# Create networkx multi graph object of transaction for given transactions
 def txs_to_multi_graph(txs):
     # Create graph
     MG=nx.MultiDiGraph()    
@@ -151,6 +167,9 @@ def txs_to_multi_graph(txs):
     MG.add_weighted_edges_from(parse_txs(txs))
     return MG
 
+# Get all block heights for given timestamp range
+# If our 'assets/blocks_data_total.csv' file does not contain block data for the given timestamp range,
+# then we will return an empty list (if it does, try running get_block_data.py to add more block data)
 def block_heights_by_stamps(start_timestamp, end_timestamp):
     block_heights = []
     with open('./assets/blocks_data_total.csv', 'r') as f1:
@@ -164,6 +183,9 @@ def block_heights_by_stamps(start_timestamp, end_timestamp):
                 block_heights.append(int(line.split(',')[0]))
     return block_heights
 
+# Get all block hashes for given timestamp range
+# If our 'assets/blocks_data_total.csv' file does not contain block data for the given timestamp range,
+# then we will return an empty list (if it does, try running get_block_data.py to add more block data)
 def block_hashes_by_stamps(start_timestamp, end_timestamp):
     block_hashes = []
     with open('./assets/blocks_data_total.csv', 'r') as f1:
@@ -189,16 +211,10 @@ def draw_graph(MG):
 
 # main function
 if __name__ == "__main__":
-    # bitcoinrpc test
-    # print(json.dumps(bitrpc.get_mempool_info()))
-    # print(json.dumps(bitrpc.list_unspent()))
-
     # Get transaction of given time range
-    filename = tx_graph_datetime("2023/01/01 00:00:00", "2023/01/02 00:00:00")
+    start_datetime = input("Enter start datetime (YYYY/MM/DD HH:MM:SS): ")
+    end_datetime = input("Enter end datetime (YYYY/MM/DD HH:MM:SS): ")
+    filename = tx_graph_datetime(start_datetime, end_datetime)
     print(f"Reading {filename}")
     MG = nx.read_weighted_edgelist(f"{filename}")
     print(dict(MG.degree(weight='weight')))
-
-    # Get transaction data of given block hash
-    # print(bitrpc.get_block("00000000000000000000ab6f2ba297568c9f7b1cdabb02ace83f1c18ac0642a3", 2))
-
