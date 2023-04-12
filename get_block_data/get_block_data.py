@@ -73,35 +73,26 @@ def verify_missing_blocks():
         print("\nTotal number of missing blocks: ", len(missing_blocks))
         print("Missing following blocks: ", missing_blocks, "\n")
 
-# WARNING: Not tested yet, and not recommended (just use get_blocks_by_month() instead)
 def add_new_file(file_path):
     last_line = ''
     with open('blocks_data_total.csv', 'r') as f:
         lines = f.readlines()
         last_line = lines[-1]
-    current_block_height = int(last_line.split(',')[0]) + 1
+    current_block_height = int(last_line.split(',')[0])
     with open('blocks_data_total.csv', 'a') as f:
         current_block_height = int(last_line.split(',')[0]) + 1
         with open(file_path, 'r') as f2:
-            lines = f2.readlines()
-            for line in reversed(lines):
-                line_split = line.split(',')
-                if line_split[0].lower() == 'height':
-                    continue
-                block_height = int(line_split[0])
+            lines = f2.readlines()[1:]
+            lines.reverse()
+            if int(lines[0].split(',')[0]) > current_block_height:
+                print("Adding this file will cause missing blocks. Make sure you do not have any gaps in your block data.\n")
+                print("Failed to add file: ", file_path, "to blocks_data_total.csv\n")
+                return
+            for line in lines:
+                block_height = int(line.split(',')[0])
                 if block_height < current_block_height:
                     continue
-                elif block_height > current_block_height:
-                    add_with_miss = input(print("Adding this file will cause missing blocks, do you still want to add it? (y/n)"))
-                    if add_with_miss == 'n':
-                        break
-                # Add block hash at the end of row - TODO: uncomment when using powerful machine
-                # print("Retrieved block hash for block height: ", block_height)
-                # block_hash = bitrpc.get_block_hash(block_height)
-                # f.write(line.strip() + ',' + block_hash + '\n')
-                # current_block_height += 1
                 f.write(line.strip() + '\n')
-                current_block_height += 1
 
 # WARNING: Not tested yet
 def add_block_hashes(start_height, end_height):
@@ -142,7 +133,7 @@ if __name__ == '__main__':
             get_number_of_blocks()
         elif command == 3:
             file_path = input("Enter file path: ").strip()
-            print(f"Adding {file_path}")
+            print(f"Adding {file_path} to blocks_data_total.csv")
             add_new_file(file_path)
         elif command == 4:
             verify_missing_blocks()
