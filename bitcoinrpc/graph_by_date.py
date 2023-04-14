@@ -1,5 +1,4 @@
 # All dates in this program in based on UTC time
-# TODO: rerun the program
 
 import os
 from bitcoinrpc import BitcoinRpc
@@ -11,23 +10,17 @@ import matplotlib.pyplot as plt
 # Get environment variables
 rpc_user = os.environ['BITCOIN_RPC_USER']
 rpc_password = os.environ['BITCOIN_RPC_PASSWORD']
+
+# Set up bitcoin rpc
 rpc_host = "localhost"
 rpc_port = 8332
 bitrpc = BitcoinRpc(rpc_user, rpc_password, rpc_host, rpc_port)
 
-# Get transaction data of given date (start_date is included, end_date is excluded)
-def tx_graph_date(start_date, end_date):
-    # Convert date in format yyyy/mm/dd to UNIX epoch time
-    start_timestamp = datetime.strptime(start_date, "%Y/%m/%d").timestamp()
-    end_timestamp = datetime.strptime(end_date, "%Y/%m/%d").timestamp()
-    graph = tx_graph_timestamp(start_timestamp, end_timestamp)
-    nx.write_weighted_edgelist(graph, f"./txs_graph/date/txs_{start_date}_{end_date}.edgelist")
-    print(f"Graph saved to ./txs_graph/date/txs_{start_date}_{end_date}.edgelist")
-    return f"./txs_graph/date/txs_{start_timestamp}_{end_timestamp}.edgelist"
-
-# Get transaction data of given datetime (start_datetime is included, end_datetime is excluded)
-# Format of datetime: %Y/%m/%d %H:%M:%S (always UTC)
 def tx_graph_datetime(start_datetime, end_datetime):
+    """ Core function that is being currently used in this program
+    Get transaction data of given datetime (start_datetime is included, end_datetime is excluded)
+    Format of datetime: %Y/%m/%d %H:%M:%S (always UTC)
+    """
     # Convert datetime in format yyyy/mm/dd hh:mm:ss to UNIX epoch time
     start_datetime = datetime.strptime(start_datetime, "%Y/%m/%d %H:%M:%S")
     end_datetime = datetime.strptime(end_datetime, "%Y/%m/%d %H:%M:%S")
@@ -35,8 +28,11 @@ def tx_graph_datetime(start_datetime, end_datetime):
     print(f"Graph saved to {filename}")
     return filename
 
-# Directly write graph data to the file instead of creating networkx object
 def write_graph(start_datetime, end_datetime):
+    """Directly write graph data to the file instead of creating networkx object
+    Parse each transaction and write parsed output to the file 
+    "./txs_graph/datetime_with_height/txs_{start_in_filename}_{end_in_filename}.edgelist"
+    """
     start_timestamp = start_datetime.timestamp()
     end_timestamp = end_datetime.timestamp()
     start_in_filename = start_datetime.strftime("%Y.%m.%d.%H.%M.%S")
@@ -66,8 +62,22 @@ def write_graph(start_datetime, end_datetime):
 
     return filename
 
-# Create networkx graph object of transaction for given timestamp
+def tx_graph_date(start_date, end_date):
+    """ -----Not being used currently-----
+    Get transaction data of given date (start_date is included, end_date is excluded)
+    """
+    # Convert date in format yyyy/mm/dd to UNIX epoch time
+    start_timestamp = datetime.strptime(start_date, "%Y/%m/%d").timestamp()
+    end_timestamp = datetime.strptime(end_date, "%Y/%m/%d").timestamp()
+    graph = tx_graph_timestamp(start_timestamp, end_timestamp)
+    nx.write_weighted_edgelist(graph, f"./txs_graph/date/txs_{start_date}_{end_date}.edgelist")
+    print(f"Graph saved to ./txs_graph/date/txs_{start_date}_{end_date}.edgelist")
+    return f"./txs_graph/date/txs_{start_timestamp}_{end_timestamp}.edgelist"
+
 def tx_graph_timestamp(start_timestamp, end_timestamp):
+    """Not being used currently
+    Create networkx graph object of transaction for given timestamp
+    """
     # Get all block hashes
     block_hashes = block_hashes_by_stamps(start_timestamp, end_timestamp)
 
@@ -81,6 +91,14 @@ def tx_graph_timestamp(start_timestamp, end_timestamp):
     return txs_to_multi_graph(transactions)
 
 def parse_tx(tx, miner_address):
+    """ Parse transaction in the format of (input addr, output addr, amount)
+    Add edge that represents transcation fee to given miner address (the type of miner address \
+    should be a list, e.g. [miner_addr]). 
+    If there are multiple inputs and outputs in the transactions, it consumes each input in given
+    order to match with output For instance, if input1 = 2 and input2 = 4, output1 = 3 and output2 = 2, 
+    there will be edges of (input1_addr, output1_addr, 2), (input2_addr, output1_addr1, 1),
+    (input2_addr, output2_addr, 3), (input2_addr, miner_addr, 1)).
+    """
     # Calculate the total amount of inputs and outputs
     # TODO: for now, only consider transactions that contain `address` field
     input_addr_amount = []
@@ -151,6 +169,8 @@ def parse_tx(tx, miner_address):
     return edges
 
 def parse_txs(txs):
+    """ Parse all the transactions in the given list.
+    """
     result = []
     miner_address = [None]
     for tx in txs:
@@ -158,8 +178,9 @@ def parse_txs(txs):
         result.extend(edges)
     return result
 
-# Create networkx multi graph object of transaction for given transactions
 def txs_to_multi_graph(txs):
+    """ Create networkx multi graph object of transaction for given transactions
+    """
     # Create graph
     MG=nx.MultiDiGraph()    
     # Add nodes
@@ -167,10 +188,12 @@ def txs_to_multi_graph(txs):
     MG.add_weighted_edges_from(parse_txs(txs))
     return MG
 
-# Get all block heights for given timestamp range
-# If our 'assets/blocks_data_total.csv' file does not contain block data for the given timestamp range,
-# then we will return an empty list (if it does, try running get_block_data.py to add more block data)
 def block_heights_by_stamps(start_timestamp, end_timestamp):
+    """Get all block heights for given timestamp range
+    If our 'assets/blocks_data_total.csv' file does not contain block data for the given timestamp range,
+    then we will return an empty list (if it does, try running get_block_data.py to add more block data)
+    """
+
     block_heights = []
     with open('./assets/blocks_data_total.csv', 'r') as f1:
         lines = f1.readlines()
@@ -183,10 +206,12 @@ def block_heights_by_stamps(start_timestamp, end_timestamp):
                 block_heights.append(int(line.split(',')[0]))
     return block_heights
 
-# Get all block hashes for given timestamp range
-# If our 'assets/blocks_data_total.csv' file does not contain block data for the given timestamp range,
-# then we will return an empty list (if it does, try running get_block_data.py to add more block data)
 def block_hashes_by_stamps(start_timestamp, end_timestamp):
+    """Get all block hashes for given timestamp range
+    If our 'assets/blocks_data_total.csv' file does not contain block data for the given timestamp range,
+    then we will return an empty list (if it does, try running get_block_data.py to add more block data)
+    """
+    
     block_hashes = []
     with open('./assets/blocks_data_total.csv', 'r') as f1:
         lines = f1.readlines()
@@ -203,8 +228,10 @@ def block_hashes_by_stamps(start_timestamp, end_timestamp):
                     block_hashes.append(line_split[9].strip())
     return block_hashes
 
-# Not drawing visible graph (too many edges)
+# Currently, not drawing visible graph (too many edges)
 def draw_graph(MG):
+    """ Draw graph of given multigraph
+    """
     plt.figure(1)
     nx.draw(MG, with_labels=True, font_weight='bold')
     plt.show()
@@ -215,6 +242,3 @@ if __name__ == "__main__":
     start_datetime = input("Enter start datetime (YYYY/MM/DD HH:MM:SS): ")
     end_datetime = input("Enter end datetime (YYYY/MM/DD HH:MM:SS): ")
     filename = tx_graph_datetime(start_datetime, end_datetime)
-    # print(f"Reading {filename}")
-    # MG = nx.read_weighted_edgelist(f"{filename}")
-    # print(dict(MG.degree(weight='weight')))
