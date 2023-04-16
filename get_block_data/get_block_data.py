@@ -6,11 +6,16 @@ from bitcoinrpc.bitcoinrpc import BitcoinRpc
 # Get environment variables
 rpc_user = os.environ['BITCOIN_RPC_USER']
 rpc_password = os.environ['BITCOIN_RPC_PASSWORD']
+
+# Setup bitcoin rpc
 rpc_host = "localhost"
 rpc_port = 8332
 bitrpc = BitcoinRpc(rpc_user, rpc_password, rpc_host, rpc_port)
 
 def get_blocks_by_month():
+    """ Get all blocks from all the files in "block_by_month" directory.
+    Note that it will overwrite existing blocks_data_total.csv file.
+    """
     blocks_by_month = './blocks_by_month'
     filenames = []
     for filename in os.listdir(blocks_by_month):
@@ -48,11 +53,15 @@ def get_blocks_by_month():
     print("\nAdded all block data from all the files to blocks_data_total.csv\n")
 
 def get_number_of_blocks():
+    """ Get number of blocks in blocks_data_total.csv file.
+    """
     with open('blocks_data_total.csv', 'r') as f:
         lines = f.readlines()
         print("Total number of blocks: ", len(lines) - 1)
 
 def verify_missing_blocks():
+    """ Check if there is any gaps in blocks_data_total.csv file.
+    """
     missing_blocks = []
     block_heights = []
     with open('blocks_data_total.csv', 'r') as f:
@@ -74,6 +83,11 @@ def verify_missing_blocks():
         print("Missing following blocks: ", missing_blocks, "\n")
 
 def add_new_file(file_path):
+    """ Add data from a file in "blocks_data_month" directory to "blocks_data_total.csv" file.
+    Note that if file format is corrupted, this function will not work. Make sure that files
+    in "blocks_data_month" directory is downloaded from BTC.com block explorer, and "blocks_data_total.csv"
+    file is in correct format.
+    """
     last_line = ''
     with open('blocks_data_total.csv', 'r') as f:
         lines = f.readlines()
@@ -94,8 +108,9 @@ def add_new_file(file_path):
                     continue
                 f.write(line.strip() + '\n')
 
-# WARNING: Not tested yet
 def add_block_hashes(start_height, end_height):
+    """ Add block hashes to "blocks_data_total.csv" file for blocks in given height range.
+    """
     with open('blocks_data_total.csv', 'r') as f:
         lines = f.readlines()
         for i in range(len(lines)):
