@@ -312,13 +312,3 @@ class BitcoinRpc():
         else:
             print("Error during get_mempool_info:", response.status_code, response.reason)
             return -1
-        
-
-# Look into scantxoutset
-# 
-# MEMPOOL commands
-# getmempoolentry: This command returns information about a specific transaction in the mempool, such as its fee rate, size, and dependencies. You can use this command to get detailed information about a specific transaction that you see in the mempool.dat file.
-
-# getrawmempool: This command returns a list of all transaction IDs in the mempool. You can use this command to get a list of all transactions in the mempool, which you can then analyze further using other commands.
-
-# estimatesmartfee: This command estimates the fee rate (in satoshis per byte) needed for a transaction to be confirmed within a certain number of blocks. You can use this command to estimate the fee rate needed for a transaction to be included in the mempool or to be confirmed by miners.
