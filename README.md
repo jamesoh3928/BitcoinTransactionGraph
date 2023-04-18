@@ -1,6 +1,3 @@
-TODO for James
-- Re-read the transaction types in Mastering Bitcoin: https://github.com/bitcoinbook/bitcoinbook/blob/develop/ch06.asciidoc
-
 # Bitcoin Transaction Graph
 
 ## Setup
