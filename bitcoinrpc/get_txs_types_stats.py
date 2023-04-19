@@ -1,4 +1,5 @@
 # Program that gets the number of transactions of each type per day
+# Stores the data in txs_types_stats directory
 
 import os
 from bitcoinrpc import BitcoinRpc
