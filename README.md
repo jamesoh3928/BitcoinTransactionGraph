@@ -104,6 +104,8 @@ Retrieved block hash for block height:  55005
 
 **Command 6**: Exit the program
 
+**Note**: After you are done with updating `blocks_data_total.csv` file, make sure you copy and paste the file into "bitcoinrpc/assets/" directory". Other programs use data from `blocks_data_total.csv` file in this directory instead of the file inside `get_block_data` directory.
+
 
 ## How to use BitcoinRPC
 `bitcoinrpc` directory is consisted of multiple programs.
