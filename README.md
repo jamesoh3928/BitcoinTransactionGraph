@@ -146,4 +146,5 @@ Enter an ending block height: 10000
 The example of written file looks like:
 ```
 2023-01-01, witness_v0_keyhash: 4763, nulldata: 22, pubkeyhash: 2885, scripthash: 4480, witness_v0_scripthash: 663, witness_v1_taproot: 52, 
+.......
 ```
